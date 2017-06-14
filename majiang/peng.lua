@@ -29,10 +29,6 @@ local function peng(raw_cards, card)
 		end
 		return false
 	end
-	-- if #raw_best.remain[])
-	-- {14,15,16,16,17,17,17,19,19,26}
-	-- if not raw_best.remain[card] then return false end	--{11,15,15,15,17,22,24,24,26,33,35,45,45}
-	-- if #raw_relation.relation_AA == 0 or not raw_best.remain[card] then return false end
 	-- reextract relation after remove {card, card}, then recover relation_AA
 	if raw_best.remain[card] == 2 then
 		AI.majiang.sub_stack(raw_best.remain, card)
