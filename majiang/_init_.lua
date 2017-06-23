@@ -9,6 +9,7 @@ M = require "majiang.select"
 
 M = require "majiang.out"
 M = require "majiang.peng"
+M = require "majiang.gang"
 
 M.river_cards = {}
 

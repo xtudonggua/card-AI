@@ -263,4 +263,17 @@ function M.evaluate_worst_card(data, relation)
 	end
 end
 
+function M.calc_card_relation(card1, card2)
+	if is_AA(card1, card2) then
+		return "AA"
+	end
+	if is_AB(card1, card2) then
+		return "AB"
+	end
+	if is_AC(card1, card2) then
+		return "AC"
+	end
+	return "A"
+end
+
 return M
