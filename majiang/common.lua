@@ -1,7 +1,8 @@
 
 local M = {}
 
-function M.get_base_card(type_list, card_list)
+function M.get_base_card(type_list, card_list, num)
+	num = num or 4
 	local cards = {}
 	type_list = type_list or {1, 2, 3}
 	card_list = card_list or {}
@@ -11,7 +12,7 @@ function M.get_base_card(type_list, card_list)
 		for i = interval[1], interval[2] do
 			table.insert(tmp_cards, i + v * 10)
 		end
-		for i = 1, 4 do
+		for i = 1, num do
 			for _, v in ipairs(tmp_cards) do
 				table.insert(cards, v)
 			end

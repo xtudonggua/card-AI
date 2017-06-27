@@ -104,12 +104,12 @@ function M.peng_consider_laizi(raw_cards, card, params)
 	if laizi_cards[card] then return false end
 	local cards = table.clone(raw_cards)
 	table.sort(cards)
-	AI.majiang.print_cards(cards)
 	for i = #cards, 1, -1 do
 		if laizi_cards[cards[i]] then
 			table.remove(cards, i)
 		end
 	end
+	AI.majiang.print_cards(cards)
 	return peng(cards, card)
 end
 

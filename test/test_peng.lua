@@ -44,7 +44,7 @@ for i = 1, loop do
 	-- local cards = {12,12,13,14,15,16,17,17,26,27}
 	-- local cards = {17,17,15,16}
 	-- local cards = {12,12,13,14,14,14,15,15,16,17}
-
+	
 	local params = {
 		-- laizi_cards = {[15] = true},
 		river_cards = {},

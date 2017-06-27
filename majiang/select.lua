@@ -57,15 +57,54 @@ local function select_max_min_path(info, path)
 	return pos, relation
 end
 
+-- {11,12,13,13,14,16,16}
+-- {"relation_AA"={16}, "relation_AB"={{13,14}}, "relation_AC"={{14,16}}} ->
+-- {"relation_AA"={16}, "relation_AB"={{13,14}}} ->
+local function modify_relation_more(relation)
+	if #relation.relation_AA == 1 then		
+		local card = relation.relation_AA[1]
+		local tmp = {}
+		local tmp2 = {}
+		for k, v in ipairs(relation.relation_AB) do
+			if v[1] == card then
+				tmp[v[2]] = true
+				relation.relation_AB[k] = nil
+			elseif v[2] == card then
+				tmp[v[1]] = true
+				relation.relation_AB[k] = nil
+			else
+				tmp2[v[1]], tmp2[v[2]] = true, true
+			end
+		end
+		for k, v in ipairs(relation.relation_AC) do
+			if v[1] == card then
+				tmp[v[2]] = true 
+				relation.relation_AC[k] = nil
+			elseif v[2] == card then
+				tmp[v[1]] = true
+				relation.relation_AC[k] = nil
+			else
+				tmp2[v[1]], tmp2[v[2]] = true, true	
+			end
+		end
+		for k, v in pairs(tmp) do
+			if not tmp2[k] then
+				table.insert(relation.single_A, k)
+			end
+		end
+	end
+end
+
 -- 
-local function select_best_relation(relation1, relation2, duizi1, duizi2)
-	local total1 = #relation1.relation_AB + #relation1.relation_AC + #relation1.single_A
-	local total2 = #relation2.relation_AB + #relation2.relation_AC + #relation2.single_A
+function M.select_best_relation(relation1, relation2, duizi1, duizi2, need_out1, need_out2)
+	local total1 = 0
+	local total2 = 0
 	if #relation1.relation_AA > 0 then
 		if duizi1 then
 			total1 = total1 + #relation1.relation_AA
 		else
 			total1 = total1 + #relation1.relation_AA - 1
+			modify_relation_more(relation1)
 		end
 	end
 	if #relation2.relation_AA > 0 then
@@ -73,8 +112,17 @@ local function select_best_relation(relation1, relation2, duizi1, duizi2)
 			total2 = total2 + #relation2.relation_AA
 		else
 			total2 = total2 + #relation2.relation_AA - 1
+			modify_relation_more(relation2)
 		end
 	end
+	if need_out1 and #relation1.single_A > 0 then
+		table.remove(relation1.single_A, 1)
+	end
+	if need_out2 and #relation2.single_A > 0 then
+		table.remove(relation2.single_A, 1)
+	end
+	total1 = #relation1.relation_AB + #relation1.relation_AC + #relation1.single_A
+	total2 = #relation2.relation_AB + #relation2.relation_AC + #relation2.single_A
 	if total1 == total2 then
 		if #relation1.relation_AB ~= #relation2.relation_AB then
 			return #relation1.relation_AB > #relation2.relation_AB and 1 or -1
@@ -88,13 +136,8 @@ local function select_best_relation(relation1, relation2, duizi1, duizi2)
 		if #relation1.relation_AC ~= #relation2.relation_AC then
 			return #relation1.relation_AC < #relation2.relation_AC and 1 or -1
 		end
-		-- if #relation1.single_A < #relation2.single_A or #relation1.relation_AC < #relation2.relation_AC
-		-- 	or #relation1.relation_AB < #relation2.relation_AB then
-		-- 	return 1
-		-- end
-		-- if #relation1.single_A > #relation2.single_A or #relation1.relation_AC > #relation2.relation_AC
-		-- 	or #relation1.relation_AB > #relation2.relation_AB then
-		-- 	return -1
+		-- if #relation1.relation_AB ~= #relation2.relation_AB then
+		-- 	return #relation1.relation_AB < #relation2.relation_AB and 1 or -1
 		-- end
 	end
 	return 0
@@ -149,7 +192,7 @@ function M.select_combine_exclude_duizi(data)
 				local bool2 = select_remain_has_AA(info[best], info[i])
 				if bool2 == 0 then
 					-- both has AA
-					local bool3 = select_best_relation(best_relation, tmp_relation)
+					local bool3 = AI.majiang.select_best_relation(best_relation, tmp_relation)
 					if bool3 == 0 then
 						table.insert(result, {i, tmp_relation})
 					elseif bool3 == -1 then
@@ -195,7 +238,7 @@ function M.select_combine_contain_duizi(data)
 			local bool1 = select_more_kanzi(info[best_idx], info[i])
 			if bool1 == 0 then
 				-- equal kanzi
-				local bool2 = select_best_relation(best_relation, tmp_relation)
+				local bool2 = AI.majiang.select_best_relation(best_relation, tmp_relation)
 				if bool2 == 0 then
 					table.insert(result, {i, tmp_relation})
 				elseif bool2 == -1 then
@@ -227,7 +270,7 @@ function M.select_combine_contain_duizi(data)
 	for i = 2, #best_list do
 		local bool1 = select_more_kanzi(best, best_list[i])
 		if bool1 == 0 then
-			local bool2 = select_best_relation(relation, relation_list[i], true, true)
+			local bool2 = AI.majiang.select_best_relation(relation, relation_list[i], true, true)
 			if bool2 == -1 then
 				best = best_list[i]
 				relation = relation_list[i]
@@ -284,7 +327,7 @@ function M.compare_best_combine1(data1, data2, need_out)
 			return false
 		end
 	end
-	local bool = select_best_relation(relation1, relation2, false, false)
+	local bool = AI.majiang.select_best_relation(relation1, relation2, false, false)
 	if need_out and bool ~= -1 then
 		return true
 	end
@@ -321,7 +364,7 @@ function M.compare_best_combine2(data1, data2, need_out)
 			return false
 		end
 	end
-	local bool = select_best_relation(relation1, relation2, true, true)
+	local bool = AI.majiang.select_best_relation(relation1, relation2, true, true)
 	if need_out and bool ~= -1 then
 		return true
 	end
@@ -368,7 +411,7 @@ function M.compare_best_combine3(data1, data2, need_out)
 			return false
 		end
 	end
-	local bool = select_best_relation(relation1, relation2, false, true)
+	local bool = AI.majiang.select_best_relation(relation1, relation2, false, true)
 	if need_out and bool ~= -1 then
 		return true
 	end
@@ -405,13 +448,41 @@ function M.compare_best_combine4(data1, data2, need_out)
 			return false
 		end
 	end
-	local bool = select_best_relation(relation1, relation2, true, false)
+	local bool = AI.majiang.select_best_relation(relation1, relation2, true, false)
 	if need_out and bool ~= -1 then
 		return true
 	end
 	if bool == 1 then
 		return true
 	end
+	return false
+end
+
+-- relation1: relation after chi
+-- relation2: raw_relation, relation before chi
+-- flag: true means relation don't need duizi
+function M.compare_relation_by_chi(relation1, relation2, flag)
+	if not flag then
+		modify_relation_more(relation1)
+	end
+	if flag then
+		if #relation1.relation_AB + #relation1.relation_AC < #relation2.relation_AB + #relation2.relation_AC then
+			return true
+		end
+	end
+	if #relation1.relation_AC > #relation2.relation_AC then
+		return false
+	end
+	if #relation1.relation_AB > #relation2.relation_AB then
+		return true
+	end
+	if #relation1.single_A > #relation2.single_A then	-- {12, 13, 14}
+		return false
+	end
+	if #relation1.single_A < #relation2.single_A then	-- {12, 13, 14}
+		return true
+	end
+
 	return false
 end
 

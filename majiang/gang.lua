@@ -45,10 +45,10 @@ local function gang(raw_cards, card)
 	return false
 end
 
-function M.gang(cards, card)
-	table.sort(cards)
-	AI.majiang.print_cards(cards)
-	return gang(cards, card)
+function M.gang(raw_cards, card)
+	table.sort(raw_cards)
+	AI.majiang.print_cards(raw_cards)
+	return gang(raw_cards, card)
 end
 
 function M.gang_consider_laizi(raw_cards, card, params)
@@ -61,6 +61,7 @@ function M.gang_consider_laizi(raw_cards, card, params)
 			table.remove(cards, i)
 		end
 	end
+	AI.majiang.print_cards(raw_cards)
 	return gang(cards, card)
 end
 
