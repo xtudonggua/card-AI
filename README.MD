@@ -1,8 +1,8 @@
-﻿
-AI
+简单的棋牌AI
+=
 
-
-1. MAJIANG
+MAJIANG
+-
 
 test
 
